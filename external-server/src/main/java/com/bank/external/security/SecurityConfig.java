@@ -2,11 +2,13 @@ package com.bank.external.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 @Configuration
 public class SecurityConfig {
@@ -25,7 +27,16 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable())
 
                 // 브라우저 팝업 로그인 끄기
-                .httpBasic(basic -> basic.disable());
+                .httpBasic(basic -> basic.disable())
+
+                // 문 규칙
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**", "/csrf", "/error").permitAll() // 로그인, CSRF 쪽지, 에러 응답은 누구나
+                        .requestMatchers("/api/customer/**").hasRole("CUSTOMER")            // 고객문
+                        .requestMatchers("/api/staff/**").hasRole("STAFF")                  // 직원문
+                        .anyRequest().denyAll())                                              // 위에 없는 주소는 전부 거절
+                .exceptionHandling(ex->ex.                 // 로그인 안한 사람이 잠긴문 들어오면 401 에러
+                        authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
 
         return http.build();
     }
