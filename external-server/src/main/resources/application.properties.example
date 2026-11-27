@@ -6,3 +6,14 @@ spring.application.name=external-server
 
 # Redis 를 실제로 쓰기 전까지 저장소 자동 설정을 꺼 둔다
 spring.data.redis.repositories.enabled=false
+
+# DB2 (외부망 PostgreSQL)
+spring.datasource.url=jdbc:postgresql://localhost:5432/db2
+spring.datasource.username=
+spring.datasource.password=
+spring.jpa.hibernate.ddl-auto=update
+
+# JWT 도장용 비밀키 (Base64, 32바이트 이상). 만들기: openssl rand -base64 32
+jwt.secret=
+# access 토큰 유효 시간
+jwt.access-token-time=15m

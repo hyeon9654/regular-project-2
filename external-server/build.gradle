@@ -32,10 +32,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     runtimeOnly 'org.postgresql:postgresql'
 
-    // JWT
-    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+    // JWT 도장 찍기·확인 (Spring Security 내장 Nimbus 방식, login-practice와 같음)
+    implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-resource-server'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
