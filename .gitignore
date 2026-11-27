@@ -2,6 +2,7 @@
 **/build/
 **/.gradle/
 **/out/
+**/bin/
 *.class
 
 # ===== Python =====
@@ -32,8 +33,7 @@
 
 # ===== 비밀값 (절대 올리지 않는다) =====
 **/.env
-**/application-prod.yml
-**/application-secret.yml
+**/application*.properties
 
 # ===== 인증서·키 =====
 **/certs/
