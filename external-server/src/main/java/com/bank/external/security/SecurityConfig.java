@@ -1,5 +1,6 @@
 package com.bank.external.security;
 
+import jakarta.servlet.http.Cookie;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
@@ -50,7 +53,7 @@ public class SecurityConfig {
     }
 
     // 토큰의 role 칸 -> ROLE_CUSTOMER / ROLE_STAFF 권한으로 바꾸는 변환기 , hasRole() 메소드는 ROLE_XXX을 찾는다
-    // 스프링은 기본으로 토큰의 scope 칸만 읽어서 권한을 만드는데,우리는 토큰의 role 칸을 읽어서 ROLE_XXX 권한을 만들게 바꾼다
+    // ** 스프링은 기본으로 토큰의 scope 칸만 읽어서 권한을 만드는데,우리는 토큰의 role 칸을 읽어서 ROLE_XXX 권한을 만들게 바꾼다
     private JwtAuthenticationConverter roleConvertor(){
         JwtGrantedAuthoritiesConverter authorities = new JwtGrantedAuthoritiesConverter();
         authorities.setAuthoritiesClaimName("role");    // 권한은 토큰의 "role"칸을 읽어
@@ -60,5 +63,36 @@ public class SecurityConfig {
         converter.setJwtGrantedAuthoritiesConverter(authorities); // 권한 만드는 규칙을 위에 만든 것으로 끼워 넣기
 
         return converter;
+    }
+
+    // 토큰 꺼내는 곳 : Authorization 헤더(고객 앱) -> 없으면 accessToken 쿠키 (직원 웹)
+    private BearerTokenResolver tokenResolver(){
+        DefaultBearerTokenResolver headerResolver = new DefaultBearerTokenResolver();
+
+        return request -> { // request 는 지금 넣는 게 아니라, 요청이 올 때마다 경비원이 넣어서 부른다
+            // 1. 열린 문에서는 토큰을 안본다
+            String uri = request.getRequestURI();
+            if(uri.startsWith("/api/auth/") || uri.equals("/csrf") || uri.equals("/error")){
+                return null;
+            }
+
+            // 2. 헤더에 있으면 그걸 쓴다 (고객 앱)
+            String fromHeader = headerResolver.resolve(request);
+            if (fromHeader != null){
+                return fromHeader;
+            }
+
+            // 3. 없으면 쿠키에서 accessToken을 찾는다 (직원 웹)
+            Cookie[] cookies = request.getCookies();
+            if (cookies == null){
+                return null;
+            }
+            for (Cookie cookie : cookies) {
+                if ("accessToken".equals(cookie.getName())){
+                    return cookie.getValue();
+                }
+            }
+            return null; // 토큰 없음
+        };
     }
 }
