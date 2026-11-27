@@ -3,6 +3,7 @@ package com.bank.external.security;
 import jakarta.servlet.http.Cookie;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -29,7 +30,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtDecoder jwtDecoder) throws Exception{
         http
                 // CSRF 방어 켜기 (직원 웹 REACT용)
-                .csrf(csrf -> csrf.spa())
+                // 단, Authorization 헤더로 토큰이 온 요청(고객 앱)은 쿠키를 안 쓰니까 검사에서 뺀다
+                .csrf(csrf -> csrf.spa().ignoringRequestMatchers(request ->
+                        request.getHeader(HttpHeaders.AUTHORIZATION) != null))
 
                 // 서버가 로그인 상태를 세션에 기억하지 않기
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
