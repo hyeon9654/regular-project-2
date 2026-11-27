@@ -50,3 +50,26 @@
 *.h5
 *.onnx
 **/data/
+
+# ===== Infrastructure =====
+**/bin/
+**/.aws/
+*.log
+
+# ===== Environment =====
+**/.env.*
+!**/.env.example
+!**/.env.sample
+
+# ===== VPN / Security =====
+*.ovpn
+*.pfx
+*.ppk
+*.crt
+*.cer
+
+# ===== Infrastructure Private Files =====
+/infra/private/
+/infra/vpn/local/
+/infra/iam/local/
+/infra/tests/output/

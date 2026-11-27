@@ -1,0 +1,46 @@
+# IDE files at the repository root
+/.idea/
+/.vscode/
+/*.iml
+
+# Local files under the infrastructure directory at the repository root
+/infra/private/
+/infra/vpn/local/
+/infra/iam/local/
+/infra/tests/output/
+/infra/**/.aws/
+/infra/**/.env
+/infra/**/.env.*
+!/infra/**/.env.example
+!/infra/**/.env.sample
+/infra/**/application-prod.yml
+/infra/**/application-secret.yml
+/infra/**/certs/
+/infra/**/data/
+/infra/**/*.ovpn
+/infra/**/*.key
+/infra/**/*.pem
+/infra/**/*.p12
+/infra/**/*.pfx
+/infra/**/*.ppk
+/infra/**/*.jks
+/infra/**/*.crt
+/infra/**/*.cer
+/infra/**/*.csr
+/infra/**/*.srl
+/infra/**/*.log
+
+# ===== AWS credentials =====
+**/.aws/
+
+# ===== Environment variables =====
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.sample
+
+# ===== Infrastructure local files =====
+/infra/build/
+/infra/.vscode/
+/infra/vpn/client.conf
+/infra/db/application-local.yml
