@@ -7,6 +7,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
@@ -45,5 +47,18 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
+    }
+
+    // 토큰의 role 칸 -> ROLE_CUSTOMER / ROLE_STAFF 권한으로 바꾸는 변환기 , hasRole() 메소드는 ROLE_XXX을 찾는다
+    // 스프링은 기본으로 토큰의 scope 칸만 읽어서 권한을 만드는데,우리는 토큰의 role 칸을 읽어서 ROLE_XXX 권한을 만들게 바꾼다
+    private JwtAuthenticationConverter roleConvertor(){
+        JwtGrantedAuthoritiesConverter authorities = new JwtGrantedAuthoritiesConverter();
+        authorities.setAuthoritiesClaimName("role");    // 권한은 토큰의 "role"칸을 읽어
+        authorities.setAuthorityPrefix("ROLE_");        // 앞에 ROLE_을 붙힌다 ex) ROLE_CUSTOMER
+
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(authorities); // 권한 만드는 규칙을 위에 만든 것으로 끼워 넣기
+
+        return converter;
     }
 }
