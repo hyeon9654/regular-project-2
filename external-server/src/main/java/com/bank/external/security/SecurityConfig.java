@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.server.resource.web.DefaultBearerToke
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 @Configuration
@@ -25,7 +26,7 @@ public class SecurityConfig {
 
     // 경비원 규칙표 (요청이 컨트롤러에 가기전에 거치는 검사 줄)
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtDecoder jwtDecoder) throws Exception{
         http
                 // CSRF 방어 켜기 (직원 웹 REACT용)
                 .csrf(csrf -> csrf.spa())
@@ -45,8 +46,14 @@ public class SecurityConfig {
                         .requestMatchers("/api/customer/**").hasRole("CUSTOMER")            // 고객문
                         .requestMatchers("/api/staff/**").hasRole("STAFF")                  // 직원문
                         .anyRequest().denyAll())                                              // 위에 없는 주소는 전부 거절
-                .exceptionHandling(ex->ex.                 // 로그인 안한 사람이 잠긴문 들어오면 401 에러
-                        authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
+
+                // 로그인 안 한 사람이 잠긴 문에 오면 401 (기본값 403 대신)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+
+                // 경비원(토큰 검사 필터)을 문 규칙 검사(AuthorizationFilter)보다 앞에 세운다
+                // 토큰으로 "누구 + 권한"을 먼저 알아낸 다음에 문 규칙이 hasRole 로 확인할 수 있게
+                .addFilterBefore(jwtFilter(jwtDecoder), AuthorizationFilter.class);
 
         return http.build();
     }
