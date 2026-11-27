@@ -4,14 +4,19 @@ import jakarta.servlet.http.Cookie;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
@@ -94,5 +99,19 @@ public class SecurityConfig {
             }
             return null; // 토큰 없음
         };
+    }
+
+    // 토큰 검사 필터(경비원) 조립 -> 지금까지 만든 부품을 하나로 합치기
+    private BearerTokenAuthenticationFilter jwtFilter(JwtDecoder jwtDecoder){
+        // 1. 담당자 : 디코더로 도장 확인 + 변환기로 role -> ROLE_ 권한 만들기
+        JwtAuthenticationProvider provider = new JwtAuthenticationProvider(jwtDecoder);
+        provider.setJwtAuthenticationConverter(roleConvertor());
+
+        // 2. 토큰 꺼내는 창구 : 토큰 찾는 부품을 끼우기
+        BearerTokenAuthenticationConverter tokenConverter = new BearerTokenAuthenticationConverter();
+        tokenConverter.setBearerTokenResolver(tokenResolver()); // 토큰은 헤더 -> 쿠키 순으로 찾기
+
+        // 3. 경비원 완성 : 창구(ProviderManager)에 담당자 앉히고, 토큰 꺼내는 창구를 연결
+        return new BearerTokenAuthenticationFilter(new ProviderManager(provider), tokenConverter);
     }
 }
