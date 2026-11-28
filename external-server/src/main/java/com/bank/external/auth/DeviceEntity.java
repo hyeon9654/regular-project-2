@@ -29,4 +29,9 @@ public class DeviceEntity {
     private LocalDateTime registeredAt;                     // 등록한 시간
 
     private LocalDateTime revokedAt;                        // 등록을 해제한 시간
+
+    // 기기 쓰고있는지 확인
+    public boolean isActive(){
+        return revokedAt == null;
+    }
 }
