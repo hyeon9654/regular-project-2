@@ -31,8 +31,11 @@ public class SecurityConfig {
         http
                 // CSRF 방어 켜기 (직원 웹 REACT용)
                 // 단, Authorization 헤더로 토큰이 온 요청(고객 앱)은 쿠키를 안 쓰니까 검사에서 뺀다
-                .csrf(csrf -> csrf.spa().ignoringRequestMatchers(request ->
-                        request.getHeader(HttpHeaders.AUTHORIZATION) != null))
+                .csrf(csrf -> csrf.spa()
+                        .ignoringRequestMatchers(request -> request.getHeader(HttpHeaders.AUTHORIZATION) != null)
+                        // 고객 로그인 (토큰 받기 전이라 헤더가 없음, 쿠키도 안 씀) 추가
+                        .ignoringRequestMatchers("/api/auth/customer/**"))
+
 
                 // 서버가 로그인 상태를 세션에 기억하지 않기
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
