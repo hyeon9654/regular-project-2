@@ -23,7 +23,7 @@ public class DeviceEntity {
     private MemberEntity member;                            // 이 기기의 주인
 
     @Column(nullable = false, unique = true, length = 100)
-    private String deviceFingerprint;                       // 앱이 만든 기기 식별값
+    private String deviceUuid;                       // 앱이 만든 기기 식별값
 
     @Column(nullable = false)
     private LocalDateTime registeredAt;                     // 등록한 시간
