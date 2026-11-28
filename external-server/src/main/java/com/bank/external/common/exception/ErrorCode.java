@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 public interface ErrorCode {
     String name();                  // 코드 이름 (예: PIN_LOCKED). enum이면 자동으로 있음
 
-    HttpStatus getStatus();         //  프링 제공 HttpStatus: 응답 상태 (401, 423 ...)
+    HttpStatus getStatus();         // 스프링 제공 HttpStatus: 응답 상태 (401, 423 ...)
 
     String getMessage();            // 앱에 보여 줄 기본 문구
 }
