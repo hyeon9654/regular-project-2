@@ -28,4 +28,25 @@ public class CredentialEntity {
     private int failedCount;        // 연속으로 틀린 횟수
 
     private LocalDateTime lockedAt; // 잠긴 시각
+
+    // static 필드라 컬럼으로 만들지 않는다
+    private static final int MAX_FAILED = 5;
+
+    // 잠겼는지 확인
+    public boolean isLocked(){
+        return lockedAt != null; // 잠긴 시각이 있으면 잠긴 상태
+    }
+
+    // PIN이 틀렸을때 failedCount += 1
+    public void recordFailure(){
+        failedCount++;
+        if (failedCount >= MAX_FAILED){
+            lockedAt = LocalDateTime.now();
+        }
+    }
+
+    // PIN이 맞았을 때 failedCount = 0으로 초기화
+    public void resetFailures(){
+        failedCount = 0;
+    }
 }
